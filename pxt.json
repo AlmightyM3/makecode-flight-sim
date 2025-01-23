@@ -3,7 +3,8 @@
     "description": "",
     "dependencies": {
         "game---light": "*",
-        "device": "*"
+        "device": "*",
+        "arcade-text": "github:pelikhan/arcade-image-text#v0.0.4"
     },
     "files": [
         "main.blocks",
