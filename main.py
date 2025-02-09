@@ -5,17 +5,10 @@ class userconfig:
 sw = userconfig.ARCADE_SCREEN_WIDTH
 sh = userconfig.ARCADE_SCREEN_HEIGHT
 
-class vec3:
-    def __init__(self, x:number,y:number,z:number):
-        self.x = x
-        self.y = y
-        self.z = z
-class vec2:
-    def __init__(self, x:number,y:number):
-        self.x = x
-        self.y = y
 
-playerPos:vec3 = vec3(0,0,150)
+playerPosX:number = 0
+playerPosY:number = 0
+playerPosZ:number = 150
 playerYaw:number = 0
 sinYaw=0
 cosYaw=1
@@ -25,7 +18,7 @@ playerVelocity = -10
 image.set_palette(hex("a5acb08f8d7c86806a6080617f745463763f3c789c4a7334776b48605b413f5d2839484f413f3545351f2c3f20253516"))
 
 uiImg = img("""
-    123456789abcdef.................................................................
+    ................................................................................
     ................................................................................
     ................................................................................
     ................................................................................
@@ -604,32 +597,32 @@ colormap = [ [1, 4, 9, 13, 13, 13, 9, 9, 1, 1, 2, 2, 2, 4, 4, 2, 2, 2, 2, 8, 8, 
 ]
 
 # Huge thanks to the tutorial from https://github.com/s-macke/VoxelSpace
-def Render(p:vec3, horizon, scale_height, distance, screen_width, screen_height):
+def Render(horizon, scale_height, distance, screen_width, screen_height):
     # Draw from back to the front (high z coordinate to low z coordinate)
     for z in range(distance, 1, -1):
         # Find line on map. This calculation corresponds to a field of view of 90°
-        pleft  = vec2((-cosYaw*z - sinYaw*z) + p.x,
-                    ( sinYaw*z - cosYaw*z) + p.y)
-        pright = vec2(( cosYaw*z - sinYaw*z) + p.x,
-                    (-sinYaw*z - cosYaw*z) + p.y)
+        pleftX = (-cosYaw*z - sinYaw*z) + playerPosX
+        pleftY = ( sinYaw*z - cosYaw*z) + playerPosY
+        prightX = ( cosYaw*z - sinYaw*z) + playerPosX
+        prightY = (-sinYaw*z - cosYaw*z) + playerPosY
         # segment the line
-        dx = (pright.x - pleft.x) / screen_width
-        dy = (pright.y - pleft.y) / screen_width
+        dx = (prightX - pleftX) / screen_width
+        dy = (prightY - pleftY) / screen_width
         #pitch = (playerPitch/(Math.PI/16) * (z /screen_width - 0.5) + 0.5) * screen_height / 3
         # Raster line and draw a vertical line for each segment
         for i in range(0, screen_width):
-            height_on_screen = (p.z - heightmap[Math.round(pleft.x%res+res)%res][Math.round(pleft.y%res+res)%res]) / z * scale_height + horizon
+            height_on_screen = (playerPosZ - heightmap[Math.round(pleftX%res+res)%res][Math.round(pleftY%res+res)%res]) / z * scale_height + horizon
             tiltOffset = (inx * (i /screen_width - 0.5) + 0.5) * screen_height / 5
-            image.screenImage().draw_line(i, height_on_screen + tiltOffset, i, screen_height, colormap[Math.round(pleft.x%res+res)%res][Math.round(pleft.y%res+res)%res])
-            pleft.x += dx
-            pleft.y += dy
+            image.screenImage().draw_line(i, height_on_screen + tiltOffset, i, screen_height, colormap[Math.round(pleftX%res+res)%res][Math.round(pleftY%res+res)%res])
+            pleftX += dx
+            pleftY += dy
 
 inx=0
 iny=0
 inz=0
 oldTime = game.runtime()
 def update():
-    global oldTime, playerPos,playerYaw,playerVelocity, inx,iny,inz, sinYaw,cosYaw #,playerPitch
+    global oldTime, playerPosX,playerPosY,playerPosZ, playerYaw,playerVelocity, inx,iny,inz, sinYaw,cosYaw #,playerPitch
     newTime = game.runtime()
     dt = (newTime-oldTime)*0.001
     oldTime = newTime
@@ -645,9 +638,9 @@ def update():
 
     playerVelocity = Math.constrain(playerVelocity+iny*dt, -20,20)
 
-    playerPos.x += sinYaw*playerVelocity*dt
-    playerPos.y += cosYaw*playerVelocity*dt
-    playerPos.z = max(playerPos.z+inz*5*dt, heightmap[Math.round(playerPos.x%256+256)%256][Math.round(playerPos.y%256+256)%256]+1)
+    playerPosX += sinYaw*playerVelocity*dt
+    playerPosY += cosYaw*playerVelocity*dt
+    playerPosZ = max(playerPosZ+inz*5*dt, heightmap[Math.round(playerPosX%256+256)%256][Math.round(playerPosX%256+256)%256]+1)
 
 game.on_update(update)
 
@@ -655,11 +648,11 @@ game.on_update(update)
 def paint():
     image.screenImage().fill_rect(0,0, sw,sh, 6)
     
-    Render(playerPos, sh/2, 12, 120, sw,sh)
+    Render(sh/2, 12, 120, sw,sh)
     
     image.screenImage().blit(0,0, sw,sh, uiImg, 0,0, 80,60,  True, False)
     image.screenImage().print("Velo: "+Math.floor(-playerVelocity),13,sh-12,0)
-    image.screenImage().print("Hight: "+Math.floor(playerPos.z/10),sw-65,sh-12,0)
+    image.screenImage().print("Hight: "+Math.floor(playerPosZ/10),sw-65,sh-12,0)
     
     image.screenImage().draw_line(sw/2,sh-15, sw/2+Math.floor(cosYaw*8),sh-15+Math.floor(sinYaw*8), 3)
     image.screenImage().draw_line(sw/2,sh-14, sw/2+Math.floor(cosYaw*8),sh-14+Math.floor(sinYaw*8), 3)
