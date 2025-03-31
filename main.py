@@ -647,6 +647,13 @@ game.on_update(update)
 # Draw to screen here
 def paint():
     image.screenImage().fill_rect(0,0, sw,sh, 6)
+
+    sunDir = Math.abs(playerYaw%(Math.PI*2))
+    if sunDir < Math.PI/2 or sunDir > 3*Math.PI/2:
+        sunPosX = Math.sin(playerYaw)*(sw/2+15) + sw/2
+        tiltOffset = (inx * (sunPosX / sw - 0.5) + 0.5) * sh / 5
+        image.screenImage().fill_circle(sunPosX,20+tiltOffset, 15,0)
+    
     
     Render(sh/2, 12, 120, sw,sh)
     

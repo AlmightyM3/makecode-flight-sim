@@ -135,7 +135,16 @@ game.onUpdate(function update() {
 })
 //  Draw to screen here
 game.onPaint(function paint() {
+    let sunPosX: number;
+    let tiltOffset: number;
     image.screenImage().fillRect(0, 0, sw, sh, 6)
+    let sunDir = Math.abs(playerYaw % (Math.PI * 2))
+    if (sunDir < Math.PI / 2 || sunDir > 3 * Math.PI / 2) {
+        sunPosX = Math.sin(playerYaw) * (sw / 2 + 15) + sw / 2
+        tiltOffset = (inx * (sunPosX / sw - 0.5) + 0.5) * sh / 5
+        image.screenImage().fillCircle(sunPosX, 20 + tiltOffset, 15, 0)
+    }
+    
     Render(sh / 2, 12, 120, sw, sh)
     image.screenImage().blit(0, 0, sw, sh, uiImg, 0, 0, 80, 60, true, false)
     image.screenImage().print("Velo: " + Math.floor(-playerVelocity), 13, sh - 12, 0)
